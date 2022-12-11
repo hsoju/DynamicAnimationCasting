@@ -10,11 +10,11 @@ void Loki::AnimationCasting::Cast::CastSpells(const RE::Actor* a_actor) {
 	RE::Actor* actor = (RE::Actor*)a_actor;
 
     bool failed = false;
-    if (actor->GetActorValue(RE::ActorValue::kStamina) < _properties.staminaCost) {
+    if (actor->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) < _properties.staminaCost) {
         logger::info("Failed kStamina check"); failed = true;
         HUD::FlashHUDMeter(RE::ActorValue::kStamina);
     }
-    if (actor->GetActorValue(RE::ActorValue::kMagicka) < _properties.magickaCost) {
+    if (actor->AsActorValueOwner()->GetActorValue(RE::ActorValue::kMagicka) < _properties.magickaCost) {
         logger::info("Failed kMagicka check"); failed = true;
         HUD::FlashHUDMeter(RE::ActorValue::kMagicka);
     }
@@ -22,7 +22,7 @@ void Loki::AnimationCasting::Cast::CastSpells(const RE::Actor* a_actor) {
 
     auto HasEffect = [actor](RE::FormID a_id) -> bool {
 
-        if (auto activeEffect = actor->GetActiveEffectList()) {
+        if (auto activeEffect = actor->AsMagicTarget()->GetActiveEffectList()) {
 
             bool hasIt = false;
             if (auto dhandle = RE::TESDataHandler::GetSingleton(); dhandle) {
@@ -69,7 +69,8 @@ void Loki::AnimationCasting::Cast::CastSpells(const RE::Actor* a_actor) {
     if (auto handle = RE::TESDataHandler::GetSingleton(); handle) {
 
         auto vrace = handle->LookupForm<RE::TESRace>(_properties.racePair.first, _properties.racePair.second);
-        if (_properties.racePair.first == -1 || _properties.racePair.first == 0 || (vrace && vrace->formID == actor->race->formID)) {
+        if (_properties.racePair.first == -1 || _properties.racePair.first == 0 ||
+            (vrace && vrace->formID == actor->GetActorBase()->race->formID)) {
         
             auto vactor = handle->LookupForm<RE::Actor>(_properties.actorPair.first, _properties.actorPair.second);
             if (_properties.actorPair.first == -1 || _properties.actorPair.first == 0 || (vactor && vactor->formID == actor->formID)) {
@@ -94,9 +95,9 @@ void Loki::AnimationCasting::Cast::CastSpells(const RE::Actor* a_actor) {
 
                                     logger::info("Passed all conditional checks, subtracting costs and casting spells now...");
 
-                                    actor->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kHealth, _properties.healthCost * -1.00f);
-                                    actor->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kMagicka, _properties.magickaCost * -1.00f);
-                                    actor->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina, _properties.staminaCost * -1.00f);
+                                    actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kHealth, _properties.healthCost * -1.00f);
+                                    actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kMagicka, _properties.magickaCost * -1.00f);
+                                    actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina, _properties.staminaCost * -1.00f);
 
                                     for (auto spell : _properties.spells) {
 

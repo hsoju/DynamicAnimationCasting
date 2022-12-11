@@ -5,8 +5,8 @@ message("Using toolchain file ${CMAKE_TOOLCHAIN_FILE}.")
 ## Define project
 ########################################################################################################################
 project(
-        DynamicAnimationCasting
-        VERSION 1.0.0
+        loki_DynamicAnimationCasting
+        VERSION 1.1.0
         DESCRIPTION "A SKSE plugin to trigger spell on animation notify."
         LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
