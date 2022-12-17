@@ -1,6 +1,6 @@
 #pragma once
 #define NOMINMAX
-#define TRUEHUD_API_COMMONLIB
+
 #include <Windows.h>
 
 #include <RE/Skyrim.h>
