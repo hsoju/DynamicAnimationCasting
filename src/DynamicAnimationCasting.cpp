@@ -97,9 +97,7 @@ void Loki::AnimationCasting::Cast::CastSpells(const RE::Actor* a_actor) {
                                     if (_properties.dupeTimer <= 0.00f || _previousTime == 0 || (_properties.dupeTimer * 1000) > (current_time - _previousTime)) {
                                         _previousTime = current_time;
 
-                                        logger::info(
-                                            "Passed all conditional checks, subtracting costs and casting spells "
-                                            "now...");
+                                        logger::info("Passed all conditional checks, subtracting costs and casting spells now...");
 
                                         actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,
                                                                                       RE::ActorValue::kHealth,
@@ -132,7 +130,8 @@ void Loki::AnimationCasting::Cast::CastSpells(const RE::Actor* a_actor) {
                                                                 0.0f,   // magnitude override
                                                                 _properties.targetCaster ? nullptr : actor  // cause
                                                             );
-                                                    } else { logger::info("Ran out of magicka."); }
+                                                    } else { logger::info("Ran out of magicka."); 
+													}
                                                 }
                                             }
                                         }
@@ -140,20 +139,28 @@ void Loki::AnimationCasting::Cast::CastSpells(const RE::Actor* a_actor) {
                                         logger::info("... Finished casting spells.");
                                     }
                            
-                                } else { logger::info("keyword check failed"); }
+                                } else { logger::info("keyword check failed"); 
+									}
 
-                            } else { logger::info("effect check failed"); }
+                            } else { logger::info("effect check failed"); 
+								}
                         
-                        } else { logger::info("weapon type check failed"); }
+                        } else { logger::info("weapon type check failed"); 
+							}
                     
-                    } else { logger::info("Left weapon check failed"); }
+                    } else { logger::info("Left weapon check failed"); 
+						}
                 
-                } else { logger::info("Right weapon check failed"); }
+                } else { logger::info("Right weapon check failed"); 
+					}
             
-            } else { logger::info("actor check failed"); }
+            } else { logger::info("actor check failed"); 
+				}
 
-        } else { logger::info("race check failed"); }
+        } else { logger::info("race check failed"); 
+			}
     }
-    else { logger::info("Error: invalid data handler"); };
+    else { logger::info("Error: invalid data handler"); 
+		};
 
 }
