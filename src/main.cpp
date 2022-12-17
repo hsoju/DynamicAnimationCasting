@@ -1,6 +1,5 @@
-﻿#include "Project/Casting/DynamicAnimationCasting.h"
-#include "Project/framework.h"
 #include <stddef.h>
+#include "Framework.h"
 
 using namespace RE::BSScript;
 using namespace SKSE;

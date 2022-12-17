@@ -1,5 +1,5 @@
-#include "framework.h"
 #include <toml++/toml.h>
+#include "Framework.h"
 
 void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
     logger::info("Reading {}...", path.string());
