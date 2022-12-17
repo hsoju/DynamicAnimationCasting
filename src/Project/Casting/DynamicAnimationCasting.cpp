@@ -82,46 +82,64 @@ void Loki::AnimationCasting::Cast::CastSpells(const RE::Actor* a_actor) {
                     auto vLWeapon = handle->LookupForm<RE::TESObjectWEAP>(_properties.weapPair.second.second, _properties.weapPair.first);
                     if (_properties.weapPair.second.second == -1 || _properties.weapPair.second.second == -1 || (vLWeapon && vLWeapon->formID == l_id)) {
 
-
                         if (_properties.weapType == -1 || _properties.weapType == 0 || 
                             (RE::WEAPON_TYPE)_properties.weapType == r_type || (RE::WEAPON_TYPE)_properties.weapType == l_type) {
-
                         
                             auto veffect = handle->LookupForm<RE::EffectSetting>(_properties.effectPair.first, _properties.effectPair.second);
                             if (_properties.effectPair.first == -1 || _properties.effectPair.first == 0 || (veffect && HasEffect(veffect->formID))) {
 
                                 auto vkeyword = handle->LookupForm<RE::BGSKeyword>(_properties.keywordPair.first, _properties.keywordPair.second);
                                 if (_properties.keywordPair.first == -1 || _properties.keywordPair.first == 0 || (vkeyword && actor->HasKeyword(vkeyword))) {
+                                        
+                                    auto current_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() 
+                                        ? _properties.dupeTimer > 0.00f : 0;
 
-                                    logger::info("Passed all conditional checks, subtracting costs and casting spells now...");
+                                    if (_properties.dupeTimer <= 0.00f || _previousTime == 0 || (_properties.dupeTimer * 1000) > (current_time - _previousTime)) {
+                                        _previousTime = current_time;
 
-                                    actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kHealth, _properties.healthCost * -1.00f);
-                                    actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kMagicka, _properties.magickaCost * -1.00f);
-                                    actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina, _properties.staminaCost * -1.00f);
+                                        logger::info(
+                                            "Passed all conditional checks, subtracting costs and casting spells "
+                                            "now...");
 
-                                    for (auto spell : _properties.spells) {
+                                        actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,
+                                                                                      RE::ActorValue::kHealth,
+                                                                                      _properties.healthCost * -1.00f);
+                                        actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,
+                                                                                      RE::ActorValue::kMagicka,
+                                                                                      _properties.magickaCost * -1.00f);
+                                        actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,
+                                                                                      RE::ActorValue::kStamina,
+                                                                                      _properties.staminaCost * -1.00f);
 
-                                        for (auto it = spell.second.begin(); it < spell.second.end(); ++it) {
-
-                                            if (auto single = handle->LookupForm<RE::SpellItem>((RE::FormID)*it, spell.first.c_str())) {
-                                                logger::info("Casting Spell ' {} ' now", single->GetFullName());
-                                                actor->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)->CastSpellImmediate(
-                                                    single,                                     // spell
-                                                    false,                                      // noHitEffectArt
-                                                    _properties.targetCaster ? actor : nullptr, // target
-                                                    1.00f,                                      // effectiveness
-                                                    false,                                      // hostileEffectivenessOnly
-                                                    0.0f,                                       // magnitude override
-                                                    _properties.targetCaster ? nullptr : actor  // cause
-                                                );
+                                        for (auto spell : _properties.spells) {
+                                            for (auto it = spell.second.begin(); it < spell.second.end(); ++it) {
+                                                if (auto single = handle->LookupForm<RE::SpellItem>((RE::FormID)*it, spell.first.c_str())) {
+                                                    logger::info("Casting Spell ' {} ' now", single->GetFullName());
+                                                    float totalCost = single->CalculateMagickaCost(actor) ? _properties.effectiveCost : 0.00f;
+                                                    if (!_properties.effectiveCost || totalCost <= actor->AsActorValueOwner()->GetActorValue(RE::ActorValue::kMagicka)) {
+                                                        if (_properties.effectiveCost) {
+                                                            actor->AsActorValueOwner()->RestoreActorValue(
+                                                                RE::ACTOR_VALUE_MODIFIER::kDamage,
+                                                                RE::ActorValue::kMagicka, totalCost * -1.00f);
+                                                        }
+                                                        actor->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)
+                                                            ->CastSpellImmediate(
+                                                                single,  // spell
+                                                                false,   // noHitEffectArt
+                                                                _properties.targetCaster ? actor : nullptr,  // target
+                                                                1.00f,  // effectiveness
+                                                                false,  // hostileEffectivenessOnly
+                                                                0.0f,   // magnitude override
+                                                                _properties.targetCaster ? nullptr : actor  // cause
+                                                            );
+                                                    } else { logger::info("Ran out of magicka."); }
+                                                }
                                             }
-
                                         }
 
+                                        logger::info("... Finished casting spells.");
                                     }
-
-                                    logger::info("... Finished casting spells.");
-
+                           
                                 } else { logger::info("keyword check failed"); }
 
                             } else { logger::info("effect check failed"); }

@@ -72,6 +72,9 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
             auto targetPlayer = eventTable["TargetCaster"].value<bool>();
             logger::info("Target Caster -> {}", *targetPlayer);
 
+            auto dupeTimer = eventTable["DuplicateTimer"].value<float>();
+            logger::info("Duplicate Timer -> {}", *dupeTimer);
+
             auto healthCost = eventTable["HealthCost"].value<float>();
             logger::info("Health Cost -> {}", *healthCost);
             
@@ -81,6 +84,9 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
             auto magickaCost = eventTable["MagickaCost"].value<float>();
             logger::info("Magicka Cost -> {}", *magickaCost);
 
+            auto effectiveCost = eventTable["UseEffectiveMagickaCost"].value<bool>();
+            logger::info("Use Effective Magicka Cost ->{}", &effectiveCost);
+
             //AnimationCasting::Cast* cast =
             //    new AnimationCasting::Cast(map, racePair, actorPair, weapPair, weapType, effectPair, keywordPair,
             //                               *targetPlayer, *healthCost, *staminaCost, *magickaCost);
@@ -89,7 +95,7 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
 
             _eventVector.emplace_back(std::piecewise_construct, std::tuple{*event},
                                       std::tuple{std::move(map), racePair, actorPair, weapPair, weapType, effectPair, keywordPair,
-                                                 *targetPlayer, *healthCost, *staminaCost, *magickaCost});
+                                                 *targetPlayer, *dupeTimer, *healthCost, *staminaCost, *magickaCost, *effectiveCost});
         }
         logger::info("Successfully read {}...", path.string());
 

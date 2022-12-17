@@ -20,9 +20,11 @@ namespace Loki {
 				std::pair<std::int32_t, std::string>                       effectPair;
 				std::pair<std::int32_t, std::string>                       keywordPair;
 				bool  targetCaster = false;
+                float dupeTimer = 0.00f;
 				float healthCost   = 0.00f;
 				float staminaCost  = 0.00f;
 				float magickaCost  = 0.00f;
+                bool effectiveCost = false;
 			};
 
 			struct Caches {
@@ -43,7 +45,8 @@ namespace Loki {
 				std::pair<std::int32_t, std::string>                       a_effectPair,
 				std::pair<std::int32_t, std::string>                       a_keywordPair,
 				bool a_targetCaster, 
-				float a_hCost, float a_sCost, float a_mCost
+				float a_dTimer,
+				float a_hCost, float a_sCost, float a_mCost, bool a_eCost
 			) {
 				_properties.racePair     = std::move(a_racePair);
 				_properties.actorPair    = std::move(a_actorPair);
@@ -53,9 +56,11 @@ namespace Loki {
 				_properties.keywordPair  = std::move(a_keywordPair);
 				_properties.spells       = std::move(a_spells);
 				_properties.targetCaster = a_targetCaster;
+                _properties.dupeTimer    = a_dTimer;
 				_properties.healthCost   = a_hCost;
 				_properties.staminaCost  = a_sCost;
 				_properties.magickaCost  = a_mCost;
+                _properties.effectiveCost = a_eCost;
 			}
 
 			void CastSpells(const RE::Actor* a_actor);
@@ -63,6 +68,7 @@ namespace Loki {
 		private:
 			Properties _properties;
             std::optional<Caches> _caches;
+            long long _previousTime = 0;
 		};
 
 	};
