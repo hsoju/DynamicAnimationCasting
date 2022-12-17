@@ -85,7 +85,7 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
             logger::info("Magicka Cost -> {}", *magickaCost);
 
             auto effectiveCost = eventTable["UseEffectiveMagickaCost"].value<bool>();
-            logger::info("Use Effective Magicka Cost ->{}", &effectiveCost);
+            logger::info("Use Effective Magicka Cost ->{}", *effectiveCost);
 
             //AnimationCasting::Cast* cast =
             //    new AnimationCasting::Cast(map, racePair, actorPair, weapPair, weapType, effectPair, keywordPair,
