@@ -17,20 +17,24 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
 
             auto raceFormID = eventTable["HasRaceFormID"].value<std::int32_t>();
             logger::info("Race Form ID -> {0:#x}", *raceFormID);
+
             auto raceEspName = eventTable["RaceEspName"].value<std::string>();
             logger::info("Race ESP name -> {}", *raceEspName);
             std::pair racePair = {*raceFormID, *raceEspName};
 
             auto actorFormID = eventTable["HasActorFormID"].value<std::int32_t>();
             logger::info("Actor Form ID -> {0:#x}", *actorFormID);
+            
             auto actorEspName = eventTable["ActorEspName"].value<std::string>();
             logger::info("Actor ESP name -> {}", *actorEspName);
             std::pair<RE::FormID, std::string> actorPair = {*actorFormID, *actorEspName};
 
             auto weapFormID = eventTable["IsEquippedRightFormID"].value<std::int32_t>();
             logger::info("Right Form ID -> {0:#x}", *weapFormID);
+            
             auto weapFormID2 = eventTable["IsEquippedLeftFormID"].value<std::int32_t>();
             logger::info("Left Form ID -> {0:#x}", *weapFormID2);
+            
             auto weapEspName = eventTable["WeaponEspName"].value<std::string>();
             logger::info("Weapon ESP name -> {}", *weapEspName);
             std::pair<RE::FormID, RE::FormID> pair = {*weapFormID, *weapFormID2};
@@ -42,12 +46,14 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
 
             auto effectFormID = eventTable["HasEffectFormID"].value<std::int32_t>();
             logger::info("Effect Form ID -> {0:#x}", *effectFormID);
+            
             auto effectEspName = eventTable["EffectEspName"].value<std::string>();
             logger::info("Effect ESP name -> {}", *effectEspName);
             std::pair<RE::FormID, std::string> effectPair = {*effectFormID, *effectEspName};
 
             auto keywordFormID = eventTable["HasKeywordFormID"].value<std::int32_t>();
             logger::info("Keyword Form ID -> {0:#x}", *keywordFormID);
+            
             auto keywordEspName = eventTable["KeywordEspName"].value<std::string>();
             logger::info("Keyword ESP name -> {}", *keywordEspName);
             std::pair<std::int32_t, std::string> keywordPair = {*keywordFormID, *keywordEspName};
@@ -68,8 +74,10 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
 
             auto healthCost = eventTable["HealthCost"].value<float>();
             logger::info("Health Cost -> {}", *healthCost);
+            
             auto staminaCost = eventTable["StaminaCost"].value<float>();
             logger::info("Stamina Cost -> {}", *staminaCost);
+            
             auto magickaCost = eventTable["MagickaCost"].value<float>();
             logger::info("Magicka Cost -> {}", *magickaCost);
 
