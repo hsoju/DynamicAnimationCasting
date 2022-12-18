@@ -172,14 +172,9 @@ void Loki::DynamicAnimationCasting::LoadTomls() {
     logger::info("Successfully read all .tomls in file.");
 }
 
-void Loki::DynamicAnimationCasting::ReplaceSpells(const std::string& a_filePath, std::uint32_t a_eventIdx, RE::SpellItem* a_newSpell) {
+void Loki::DynamicAnimationCasting::ReplaceSpells(const std::string& a_filePath, std::uint32_t a_eventIdx, std::vector<RE::SpellItem*>* a_newSpells) {
 	auto  pairKey = std::pair<std::string, size_t>(a_filePath, a_eventIdx);
-	auto& caster = _casters[pairKey];
-	if (caster->reassignments == nullptr) {
-		std::vector<std::pair<RE::SpellItem*, RE::SpellItem*>> spellVector;
-		caster->reassignments = &spellVector;
-	}
-	caster->reassignments->push_back(std::pair<RE::SpellItem*, RE::SpellItem*>(a_originalSpell, a_newSpell));
+	_casters[pairKey]->additions = a_newSpells;
 }
 
 void Loki::DynamicAnimationCasting::SwapSpells(const std::string &a_filePath, std::uint32_t a_eventIdx, RE::SpellItem* a_originalSpell, RE::SpellItem* a_newSpell)
