@@ -68,6 +68,7 @@ namespace Loki {
 			std::string_view fileName;
 			std::uint32_t fileIdx;
 			long long previousTime = 0;
+			std::vector<std::pair<RE::SpellItem*,RE::SpellItem*>>* reassignments = nullptr;
 
 		private:
 			Properties _properties;

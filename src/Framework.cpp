@@ -2,12 +2,13 @@
 #include "Framework.h"
 
 void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
-    logger::info("Reading {}...", path.string());
+	std::string strPath = path.string();
+	logger::info("Reading {}...", strPath);
     try {
         const auto tbl = toml::parse_file(path.c_str());
         auto& arr = *tbl.get_as<toml::array>("event");
 
-		std::uint32_t idx = 0;
+		size_t idx = 0;
         for (auto&& elem : arr) {
             auto& eventTable = *elem.as_table();
 
@@ -131,6 +132,9 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
             _eventVector.emplace_back(std::piecewise_construct, std::tuple{*event},
                                       std::tuple{std::move(map), racePair, actorPair, weapPair, weapType, effectPair, keywordPair,
                                                  *targetPlayer, *dupeTimer, *healthCost, *staminaCost, *magickaCost, *effectiveCost});
+			Loki::AnimationCasting::Cast* caster = &_eventVector.back().second;
+			_casters[std::pair<std::string, size_t>(strPath, idx)] = caster;
+			idx += 1;
         }
         logger::info("Successfully read {}...", path.string());
 
@@ -166,6 +170,17 @@ void Loki::DynamicAnimationCasting::LoadTomls() {
     }
 
     logger::info("Successfully read all .tomls in file.");
+}
+
+void Loki::DynamicAnimationCasting::SwapSpells(const std::string &a_filepath, std::uint32_t a_eventIdx, RE::SpellItem* a_originalSpell, RE::SpellItem* a_newSpell)
+{
+	auto pairKey = std::pair<std::string, size_t>(a_filepath, a_eventIdx);
+	auto& caster = _casters[pairKey];
+	if (caster->reassignments == nullptr) {
+		std::vector<std::pair<RE::SpellItem*, RE::SpellItem*>> spellVector;
+		caster->reassignments = &spellVector;
+	}
+	caster->reassignments->push_back(std::pair<RE::SpellItem*, RE::SpellItem*>(a_originalSpell, a_newSpell));
 }
 
 void Loki::DynamicAnimationCasting::InstallGraphEventSink() {

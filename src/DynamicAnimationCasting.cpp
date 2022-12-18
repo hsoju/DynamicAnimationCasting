@@ -97,10 +97,20 @@ void Loki::AnimationCasting::Cast::CastSpells(const RE::Actor* a_actor) {
 										
                                         previousTime = currentTime;
 
-
+										size_t numReassignments = 0 ? reassignments == nullptr : reassignments->size();
+										size_t spellIdx = 0;
                                         for (auto spell : _properties.spells) {
                                             for (auto it = spell.second.begin(); it < spell.second.end(); ++it) {
-                                                if (auto single = handle->LookupForm<RE::SpellItem>((RE::FormID)*it, spell.first.c_str())) {
+												auto single = handle->LookupForm<RE::SpellItem>((RE::FormID)*it, spell.first.c_str());
+												if (numReassignments != 0 && single) {
+													for (auto&& elem : *reassignments) {
+														if (elem.first == single && elem.second) {
+															single = elem.second;
+															break;
+														}
+													}
+												}
+                                                if (single) {
                                                     float totalCost = single->CalculateMagickaCost(actor) ? _properties.effectiveCost : 0.00f;
                                                     if (!_properties.effectiveCost || totalCost <= actor->AsActorValueOwner()->GetActorValue(RE::ActorValue::kMagicka)) {
 														logger::info("Passed all conditional checks, subtracting costs and casting spells now...");
@@ -140,6 +150,7 @@ void Loki::AnimationCasting::Cast::CastSpells(const RE::Actor* a_actor) {
 														return;
 													}
                                                 }
+												spellIdx += 1;
                                             }
                                         }
 
