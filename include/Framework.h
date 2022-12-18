@@ -32,7 +32,7 @@ namespace Loki {
 
 		static inline std::unordered_map<std::pair<std::string, size_t>, Loki::AnimationCasting::Cast*> _casters = {};
 		static void ReplaceSpells(const std::string& a_filePath, std::uint32_t a_eventIdx, std::vector<RE::SpellItem*>* a_newSpells);
-		static void SwapSpells(const std::string& a_filepath, std::uint32_t a_eventIdx, RE::SpellItem* a_originalSpell, RE::SpellItem* a_newSpell);
+		static void SwapSpell(const std::string& a_filepath, std::uint32_t a_eventIdx, RE::SpellItem* a_originalSpell, RE::SpellItem* a_newSpell);
 		//static inline std::unordered_map<std::pair<std::string_view, std::uint32_t&>&, std::vector<RE::SpellItem*>&> papyrusMapping = {};
 		//static void AddSpells(std::string_view a_filepath, std::uint32_t &a_spellIdx, std::vector<RE::SpellItem*> &a_spells);
     };

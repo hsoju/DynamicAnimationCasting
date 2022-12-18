@@ -177,7 +177,7 @@ void Loki::DynamicAnimationCasting::ReplaceSpells(const std::string& a_filePath,
 	_casters[pairKey]->additions = a_newSpells;
 }
 
-void Loki::DynamicAnimationCasting::SwapSpells(const std::string &a_filePath, std::uint32_t a_eventIdx, RE::SpellItem* a_originalSpell, RE::SpellItem* a_newSpell)
+void Loki::DynamicAnimationCasting::SwapSpell(const std::string &a_filePath, std::uint32_t a_eventIdx, RE::SpellItem* a_originalSpell, RE::SpellItem* a_newSpell)
 {
 	auto pairKey = std::pair<std::string, size_t>(a_filePath, a_eventIdx);
 	auto& caster = _casters[pairKey];
