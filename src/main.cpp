@@ -46,8 +46,20 @@ namespace {
     //    log::trace("Cosave serialization initialized.");
     //}
 
-    void InitializePapyrus() {
+	bool ReplaceSpells(RE::StaticFunctionTag*, RE::BSFixedString a_filePath, std::uint32_t a_eventIdx, std::vector<RE::SpellItem*> a_newSpells) {
+		Loki::DynamicAnimationCasting::ReplaceSpells(std::string(a_filePath.c_str()), a_eventIdx, &a_newSpells);
+	}
+
+	bool SwapSpell(RE::StaticFunctionTag*, RE::BSFixedString a_filePath, std::uint32_t a_eventIdx, RE::SpellItem* a_originalSpell, RE::SpellItem* a_newSpell) {
+		Loki::DynamicAnimationCasting::SwapSpell(std::string(a_filePath.c_str()), a_eventIdx, a_originalSpell, a_newSpell);
+	}
+
+    bool InitializePapyrus(RE::BSScript::IVirtualMachine* a_vm) {
         log::trace("Initializing Papyrus binding...");
+		a_vm->RegisterFunction("ReplaceSpells", "DynamicAnimationCasting", ReplaceSpells);
+		a_vm->RegisterFunction("SwapSpell", "DynamicAnimationCasting", SwapSpell);
+		log::trace("Papyrus binding finished.");
+		return true;
     }
 
     void InitializeHooking() {
@@ -125,7 +137,8 @@ extern "C" [[maybe_unused]] DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::L
 
     InitializeMessaging();
     // InitializeSerialization();
-    InitializePapyrus();
+	const auto papyrus = SKSE::GetPapyrusInterface();
+	papyrus->Register(InitializePapyrus);
 
     log::info("{} has finished loading.", plugin->GetName());
     return true;
