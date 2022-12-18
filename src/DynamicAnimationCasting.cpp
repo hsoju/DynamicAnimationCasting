@@ -91,11 +91,11 @@ void Loki::AnimationCasting::Cast::CastSpells(const RE::Actor* a_actor) {
                                 auto vkeyword = handle->LookupForm<RE::BGSKeyword>(_properties.keywordPair.first, _properties.keywordPair.second);
                                 if (_properties.keywordPair.first == -1 || _properties.keywordPair.first == 0 || (vkeyword && actor->HasKeyword(vkeyword))) {
                                         
-                                    auto current_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() 
-                                        ? _properties.dupeTimer > 0.00f : 0;
+                                    auto currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
-                                    if (_properties.dupeTimer <= 0.00f || _previousTime == 0 || (_properties.dupeTimer * 1000) > (current_time - _previousTime)) {
-                                        _previousTime = current_time;
+                                    if (_properties.dupeTimer <= 0.00f || previousTime == 0 || ((_properties.dupeTimer * 1000) < (currentTime - previousTime))) {
+										
+                                        previousTime = currentTime;
 
                                         logger::info("Passed all conditional checks, subtracting costs and casting spells now...");
 

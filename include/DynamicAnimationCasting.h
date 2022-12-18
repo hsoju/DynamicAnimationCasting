@@ -64,11 +64,12 @@ namespace Loki {
 			}
 
 			void CastSpells(const RE::Actor* a_actor);
+			
+			long long previousTime = 0;
 
 		private:
 			Properties _properties;
             std::optional<Caches> _caches;
-            long long _previousTime = 0;
 		};
 
 	};
