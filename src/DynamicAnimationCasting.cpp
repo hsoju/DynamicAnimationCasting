@@ -156,7 +156,7 @@ void Loki::AnimationCasting::Cast::CastSpells(const RE::Actor* a_actor) {
 											for (auto spell : _properties.spells) {
 												for (auto it = spell.second.begin(); it < spell.second.end(); ++it) {
 													auto single = handle->LookupForm<RE::SpellItem>((RE::FormID)*it, spell.first.c_str());
-													bool success = CastSpell(single, actor);
+													bool success = CastSpell(single, actor, numReassignments);
 													if (!success) {
 														return;
 													}
@@ -164,7 +164,7 @@ void Loki::AnimationCasting::Cast::CastSpells(const RE::Actor* a_actor) {
 											}
 										} else {
 											for (auto spell : *additions) {
-												bool success = CastSpell(spell, actor);
+												bool success = CastSpell(spell, actor, numReassignments);
 												if (!success) {
 													return;
 												}
