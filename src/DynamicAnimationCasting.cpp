@@ -134,7 +134,10 @@ void Loki::AnimationCasting::Cast::CastSpells(const RE::Actor* a_actor) {
                                                                 0.0f,   // magnitude override
                                                                 _properties.targetCaster ? nullptr : actor  // cause
                                                             );
-                                                    } else { logger::info("Ran out of magicka."); 
+                                                    } else { 
+														logger::info("Failed effective magicka cost check");
+														HUD::FlashHUDMeter(RE::ActorValue::kMagicka);
+														return;
 													}
                                                 }
                                             }
