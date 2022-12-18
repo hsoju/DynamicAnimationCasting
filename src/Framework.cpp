@@ -7,7 +7,7 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
         const auto tbl = toml::parse_file(path.c_str());
         auto& arr = *tbl.get_as<toml::array>("event");
 
-		uint32_t idx = 0;
+		std::uint32_t idx = 0;
         for (auto&& elem : arr) {
             auto& eventTable = *elem.as_table();
 

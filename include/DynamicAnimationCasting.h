@@ -66,7 +66,7 @@ namespace Loki {
 			void CastSpells(const RE::Actor* a_actor);
 			
 			std::string_view fileName;
-			uint32_t         fileIdx;
+			std::uint32_t fileIdx;
 			long long previousTime = 0;
 
 		private:
