@@ -72,7 +72,12 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
             auto targetPlayer = eventTable["TargetCaster"].value<bool>();
             logger::info("Target Caster -> {}", *targetPlayer);
 
-            auto dupeTimer = eventTable["DuplicateTimer"].value<float>();
+			std::optional<float> dupeTimer;
+			if (eventTable.contains("DuplicateTimer")) {
+				dupeTimer = eventTable["DuplicateTimer"].value<float>();
+			} else {
+				dupeTimer = 0.00f;
+			}
             logger::info("Duplicate Timer -> {}", *dupeTimer);
 
             auto healthCost = eventTable["HealthCost"].value<float>();
@@ -84,8 +89,13 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
             auto magickaCost = eventTable["MagickaCost"].value<float>();
             logger::info("Magicka Cost -> {}", *magickaCost);
 
-            auto effectiveCost = eventTable["UseEffectiveMagickaCost"].value<bool>();
-            logger::info("Use Effective Magicka Cost ->{}", *effectiveCost);
+			std::optional<bool> effectiveCost;
+			if (eventTable.contains("UseEffectiveMagickaCost")) {
+				effectiveCost = eventTable["UseEffectiveMagickaCost"].value<bool>();
+			} else {
+				effectiveCost = false;
+			}
+			logger::info("Use Effective Magicka Cost ->{}", *effectiveCost);
 
             //AnimationCasting::Cast* cast =
             //    new AnimationCasting::Cast(map, racePair, actorPair, weapPair, weapType, effectPair, keywordPair,
