@@ -7,6 +7,7 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
         const auto tbl = toml::parse_file(path.c_str());
         auto& arr = *tbl.get_as<toml::array>("event");
 
+		uint32_t idx = 0;
         for (auto&& elem : arr) {
             auto& eventTable = *elem.as_table();
 
@@ -106,6 +107,10 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
             _eventVector.emplace_back(std::piecewise_construct, std::tuple{*event},
                                       std::tuple{std::move(map), racePair, actorPair, weapPair, weapType, effectPair, keywordPair,
                                                  *targetPlayer, *dupeTimer, *healthCost, *staminaCost, *magickaCost, *effectiveCost});
+			auto& caster = _eventVector.back().second;
+			caster.fileName = std::string_view(path.string());
+			caster.fileIdx = idx;
+			idx += 1;
         }
         logger::info("Successfully read {}...", path.string());
 
