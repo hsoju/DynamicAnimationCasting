@@ -97,29 +97,33 @@ void Loki::AnimationCasting::Cast::CastSpells(const RE::Actor* a_actor) {
 										
                                         previousTime = currentTime;
 
-                                        logger::info("Passed all conditional checks, subtracting costs and casting spells now...");
-
-                                        actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,
-                                                                                      RE::ActorValue::kHealth,
-                                                                                      _properties.healthCost * -1.00f);
-                                        actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,
-                                                                                      RE::ActorValue::kMagicka,
-                                                                                      _properties.magickaCost * -1.00f);
-                                        actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,
-                                                                                      RE::ActorValue::kStamina,
-                                                                                      _properties.staminaCost * -1.00f);
 
                                         for (auto spell : _properties.spells) {
                                             for (auto it = spell.second.begin(); it < spell.second.end(); ++it) {
                                                 if (auto single = handle->LookupForm<RE::SpellItem>((RE::FormID)*it, spell.first.c_str())) {
-                                                    logger::info("Casting Spell ' {} ' now", single->GetFullName());
                                                     float totalCost = single->CalculateMagickaCost(actor) ? _properties.effectiveCost : 0.00f;
                                                     if (!_properties.effectiveCost || totalCost <= actor->AsActorValueOwner()->GetActorValue(RE::ActorValue::kMagicka)) {
-                                                        if (_properties.effectiveCost) {
+														logger::info("Passed all conditional checks, subtracting costs and casting spells now...");
+
+														actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,
+															RE::ActorValue::kHealth,
+															_properties.healthCost * -1.00f);
+														
+														actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,
+															RE::ActorValue::kStamina,
+															_properties.staminaCost * -1.00f);
+                                                        
+														if (_properties.effectiveCost) {
                                                             actor->AsActorValueOwner()->RestoreActorValue(
                                                                 RE::ACTOR_VALUE_MODIFIER::kDamage,
-                                                                RE::ActorValue::kMagicka, totalCost * -1.00f);
-                                                        }
+                                                                RE::ActorValue::kMagicka, (_properties.magickaCost + totalCost) * -1.00f);
+														} else {
+															actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,
+																RE::ActorValue::kMagicka,
+																_properties.magickaCost * -1.00f);
+														}
+														
+														logger::info("Casting Spell ' {} ' now", single->GetFullName());
                                                         actor->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)
                                                             ->CastSpellImmediate(
                                                                 single,  // spell
