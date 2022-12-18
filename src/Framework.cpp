@@ -61,14 +61,38 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
 
             auto spells = eventTable["SpellFormIDs"].as_array();
             std::unordered_map<std::string, std::vector<std::int32_t>> map = {};
-            std::vector<std::int32_t> vector = {};
-            if (spells) {
+			if (spells) {
+				//std::vector<std::int32_t> vector = {};
+				std::vector<std::string> espVector = {};
+				bool multipleEsps = eventTable["SpellEspName"].is_array();
+				if (!multipleEsps) {
+					auto spellEspName = eventTable["SpellEspName"].value<std::string>();
+					espVector.push_back(*spellEspName);
+					logger::info("Spell ESP name -> {}", *spellEspName);
+				}
+				else {
+					auto spellEspNames = eventTable["SpellEspName"].as_array();
+					for (auto& spellEspName : *spellEspNames) {
+						espVector.push_back(*spellEspName.value<std::string>());
+						logger::info("Spell ESP name -> {}", *spellEspName.value<std::string>());
+					}
+				}
+				size_t numSpellEsps = espVector.size();
+				size_t spellIdx = 0;
                 for (auto& spell : *spells) {
                     logger::info("Spell Form ID -> {0:#x}", *spell.value<std::int32_t>());
-                    vector.push_back(*spell.value<std::int32_t>());
+					const std::string& spellEspName = espVector[spellIdx];
+					if (!map.contains(spellEspName)) {
+						map.insert(spellEspName, {});
+					}
+					auto& spellVector = map[spellEspName];
+					spellVector.push_back(*spell.value<std::int32_t>());
+                    //vector.push_back(*spell.value<std::int32_t>());
+					if (spellIdx < (numSpellEsps - 1)) {
+						spellIdx += 1;
+					}
                 }
-                auto spellEspName = eventTable["SpellEspName"].value<std::string>();
-                map.insert_or_assign(*spellEspName, vector);
+                //map.insert_or_assign(*spellEspName, vector);
             }
             auto targetPlayer = eventTable["TargetCaster"].value<bool>();
             logger::info("Target Caster -> {}", *targetPlayer);
@@ -107,10 +131,6 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
             _eventVector.emplace_back(std::piecewise_construct, std::tuple{*event},
                                       std::tuple{std::move(map), racePair, actorPair, weapPair, weapType, effectPair, keywordPair,
                                                  *targetPlayer, *dupeTimer, *healthCost, *staminaCost, *magickaCost, *effectiveCost});
-			auto& caster = _eventVector.back().second;
-			caster.fileName = std::string_view(path.string());
-			caster.fileIdx = idx;
-			idx += 1;
         }
         logger::info("Successfully read {}...", path.string());
 
