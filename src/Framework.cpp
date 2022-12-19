@@ -8,7 +8,7 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
         const auto tbl = toml::parse_file(path.c_str());
         auto& arr = *tbl.get_as<toml::array>("event");
 
-		size_t idx = 0;
+		//size_t idx = 0;
         for (auto&& elem : arr) {
             auto& eventTable = *elem.as_table();
 
@@ -132,9 +132,9 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
             _eventVector.emplace_back(std::piecewise_construct, std::tuple{*event},
                                       std::tuple{std::move(map), racePair, actorPair, weapPair, weapType, effectPair, keywordPair,
                                                  *targetPlayer, *dupeTimer, *healthCost, *staminaCost, *magickaCost, *effectiveCost});
-			Loki::AnimationCasting::Cast* caster = &_eventVector.back().second;
-			_casters[std::pair<std::string, size_t>(strPath, idx)] = caster;
-			idx += 1;
+			//Loki::AnimationCasting::Cast* caster = &_eventVector.back().second;
+			//_casters[std::pair<std::string, size_t>(strPath, idx)] = caster;
+			//idx += 1;
         }
         logger::info("Successfully read {}...", path.string());
 
@@ -172,21 +172,39 @@ void Loki::DynamicAnimationCasting::LoadTomls() {
     logger::info("Successfully read all .tomls in file.");
 }
 
-void Loki::DynamicAnimationCasting::ReplaceSpells(const std::string& a_filePath, std::uint32_t a_eventIdx, std::vector<RE::SpellItem*>* a_newSpells) {
-	auto  pairKey = std::pair<std::string, size_t>(a_filePath, a_eventIdx);
-	_casters[pairKey]->additions = a_newSpells;
-}
-
-void Loki::DynamicAnimationCasting::SwapSpell(const std::string &a_filePath, std::uint32_t a_eventIdx, RE::SpellItem* a_originalSpell, RE::SpellItem* a_newSpell)
-{
-	auto pairKey = std::pair<std::string, size_t>(a_filePath, a_eventIdx);
-	auto& caster = _casters[pairKey];
-	if (caster->reassignments == nullptr) {
-		std::vector<std::pair<RE::SpellItem*, RE::SpellItem*>> spellVector;
-		caster->reassignments = &spellVector;
-	}
-	caster->reassignments->push_back(std::pair<RE::SpellItem*, RE::SpellItem*>(a_originalSpell, a_newSpell));
-}
+//void Loki::DynamicAnimationCasting::LoadAdditions() {
+//	for (auto& elem : _additions) {
+//		_casters[elem.first]->additions = elem.second;
+//	}
+//}
+//
+//void Loki::DynamicAnimationCasting::ReplaceSpells(const std::string& a_filePath, std::uint32_t a_eventIdx, std::vector<RE::SpellItem*>* a_newSpells) {
+//	auto pairKey = std::pair<std::string, size_t>(a_filePath, a_eventIdx);
+//	_casters[pairKey]->additions = a_newSpells;
+//	_additions[pairKey] = a_newSpells;
+//}
+//
+//void Loki::DynamicAnimationCasting::SwapSpell(const std::string &a_filePath, std::uint32_t a_eventIdx, RE::SpellItem* a_originalSpell, RE::SpellItem* a_newSpell)
+//{
+//	auto pairKey = std::pair<std::string, size_t>(a_filePath, a_eventIdx);
+//	auto& caster = _casters[pairKey];
+//	bool alreadyAssigned = false;
+//	if (caster->reassignments == nullptr) {
+//		std::vector<std::pair<RE::SpellItem*, RE::SpellItem*>> spellVector;
+//		caster->reassignments = &spellVector;
+//	} else {
+//		for (auto& elem : *(caster->reassignments)) {
+//			if (elem.second == a_originalSpell) {
+//				elem.second = a_newSpell;
+//				alreadyAssigned = true;
+//				break;
+//			}
+//		}
+//	}
+//	if (!alreadyAssigned) {
+//		caster->reassignments->push_back(std::pair<RE::SpellItem*, RE::SpellItem*>(a_originalSpell, a_newSpell));
+//	}
+//}
 
 void Loki::DynamicAnimationCasting::InstallGraphEventSink() {
     logger::info("Injecting Graph Event Sink Hooks");
