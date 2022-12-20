@@ -5,36 +5,18 @@ void Loki::HUD::FlashHUDMeter(RE::ActorValue a_av) {
     return FlashHUDMenuMeter(a_av);
 }
 
-bool Loki::AnimationCasting::Cast::CastSpell(RE::SpellItem* a_spell, RE::Actor* a_actor, size_t numReassignments) {
-	if (numReassignments != 0 && a_spell) {
-		for (auto&& elem : *reassignments) {
-			if (elem.first == a_spell && elem.second) {
-				a_spell = elem.second;
-				break;
-			}
-		}
-	}
+bool Loki::AnimationCasting::Cast::CastSpell(RE::SpellItem* a_spell, RE::Actor* a_actor) {
 	if (a_spell) {
-		float totalCost = a_spell->CalculateMagickaCost(a_actor) ? _properties.effectiveCost : 0.00f;
+		float totalCost = 0.0f;
+		if (_properties.effectiveCost) {
+			totalCost = a_spell->CalculateMagickaCost(a_actor);
+		}
 		if (!_properties.effectiveCost || totalCost <= a_actor->AsActorValueOwner()->GetActorValue(RE::ActorValue::kMagicka)) {
 			logger::info("Passed all conditional checks, subtracting costs and casting spells now...");
-
-			a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,
-				RE::ActorValue::kHealth,
-				_properties.healthCost * -1.00f);
-
-			a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,
-				RE::ActorValue::kStamina,
-				_properties.staminaCost * -1.00f);
-
 			if (_properties.effectiveCost) {
 				a_actor->AsActorValueOwner()->RestoreActorValue(
 					RE::ACTOR_VALUE_MODIFIER::kDamage,
-					RE::ActorValue::kMagicka, (_properties.magickaCost + totalCost) * -1.00f);
-			} else {
-				a_actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,
-					RE::ActorValue::kMagicka,
-					_properties.magickaCost * -1.00f);
+					RE::ActorValue::kMagicka, totalCost * -1.00f);
 			}
 
 			logger::info("Casting Spell ' {} ' now", a_spell->GetFullName());
@@ -151,26 +133,34 @@ void Loki::AnimationCasting::Cast::CastSpells(const RE::Actor* a_actor) {
 										
                                         previousTime = currentTime;
 
-										size_t numReassignments = 0 ? reassignments == nullptr : reassignments->size();
-										if (additions == nullptr) {
+										actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,
+											RE::ActorValue::kHealth,
+											_properties.healthCost * -1.00f);
+										actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,
+											RE::ActorValue::kStamina,
+											_properties.staminaCost * -1.00f);
+										actor->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,
+											RE::ActorValue::kMagicka,
+											_properties.magickaCost * -1.00f);
+
+										if (replacements.size() < 1) {
 											for (auto spell : _properties.spells) {
 												for (auto it = spell.second.begin(); it < spell.second.end(); ++it) {
 													auto single = handle->LookupForm<RE::SpellItem>((RE::FormID)*it, spell.first.c_str());
-													bool success = CastSpell(single, actor, numReassignments);
+													bool success = CastSpell(single, actor);
 													if (!success) {
 														return;
 													}
 												}
 											}
 										} else {
-											for (auto spell : *additions) {
-												bool success = CastSpell(spell, actor, numReassignments);
+											for (auto spell : replacements) {
+												bool success = CastSpell(spell, actor);
 												if (!success) {
 													return;
 												}
 											}
 										}
-
                                         logger::info("... Finished casting spells.");
                                     }
                            
