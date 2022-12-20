@@ -60,42 +60,46 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
             logger::info("Keyword ESP name -> {}", *keywordEspName);
             std::pair<std::int32_t, std::string> keywordPair = {*keywordFormID, *keywordEspName};
 
-            auto spells = eventTable["SpellFormIDs"].as_array();
-            std::unordered_map<std::string, std::vector<std::int32_t>> map = {};
-			if (spells) {
-				//std::vector<std::int32_t> vector = {};
-				std::vector<std::string> espVector = {};
-				bool multipleEsps = eventTable["SpellEspName"].is_array();
-				if (!multipleEsps) {
-					auto spellEspName = eventTable["SpellEspName"].value<std::string>();
-					espVector.push_back(*spellEspName);
-					logger::info("Spell ESP name -> {}", *spellEspName);
-				}
-				else {
-					auto spellEspNames = eventTable["SpellEspName"].as_array();
-					for (auto& spellEspName : *spellEspNames) {
-						espVector.push_back(*spellEspName.value<std::string>());
-						logger::info("Spell ESP name -> {}", *spellEspName.value<std::string>());
+			std::unordered_map<std::string, std::vector<std::int32_t>> map = {};
+			bool spellsHaveUUID = eventTable["SpellFormIDs"].is_string();
+			std::string spellUUID;
+			if (!spellsHaveUUID) {
+				auto spells = eventTable["SpellFormIDs"].as_array();
+				if (spells) {
+					std::vector<std::string> espVector;
+					bool multipleEsps = eventTable["SpellEspName"].is_array();
+					if (!multipleEsps) {
+						auto spellEspName = eventTable["SpellEspName"].value<std::string>();
+						espVector.push_back(*spellEspName);
+						logger::info("Spell ESP name -> {}", *spellEspName);
+					} else {
+						auto spellEspNames = eventTable["SpellEspName"].as_array();
+						for (auto& spellEspName : *spellEspNames) {
+							espVector.push_back(*spellEspName.value<std::string>());
+							logger::info("Spell ESP name -> {}", *spellEspName.value<std::string>());
+						}
+					}
+					size_t numSpellEsps = espVector.size();
+					size_t spellIdx = 0;
+					for (auto& spell : *spells) {
+						logger::info("Spell Form ID -> {0:#x}", *spell.value<std::int32_t>());
+						const std::string& spellEspName = espVector[spellIdx];
+						if (!map.contains(spellEspName)) {
+							map[spellEspName] = std::vector<std::int32_t>();
+						}
+						map[spellEspName].push_back(*spell.value<std::int32_t>());
+						if (spellIdx < (numSpellEsps - 1)) {
+							spellIdx += 1;
+						}
 					}
 				}
-				size_t numSpellEsps = espVector.size();
-				size_t spellIdx = 0;
-                for (auto& spell : *spells) {
-                    logger::info("Spell Form ID -> {0:#x}", *spell.value<std::int32_t>());
-					const std::string& spellEspName = espVector[spellIdx];
-					if (!map.contains(spellEspName)) {
-						map.insert(spellEspName, {});
-					}
-					auto& spellVector = map[spellEspName];
-					spellVector.push_back(*spell.value<std::int32_t>());
-                    //vector.push_back(*spell.value<std::int32_t>());
-					if (spellIdx < (numSpellEsps - 1)) {
-						spellIdx += 1;
-					}
-                }
-                //map.insert_or_assign(*spellEspName, vector);
-            }
-            auto targetPlayer = eventTable["TargetCaster"].value<bool>();
+			} else {
+				auto spell = eventTable["SpellFormIDs"].value<std::string>();
+				logger::info("Spell uuid -> {}", *spell);
+				spellUUID = std::move(*spell);
+			}
+
+			auto targetPlayer = eventTable["TargetCaster"].value<bool>();
             logger::info("Target Caster -> {}", *targetPlayer);
 
 			std::optional<float> dupeTimer;
@@ -132,9 +136,13 @@ void Loki::DynamicAnimationCasting::ReadToml(std::filesystem::path path) {
             _eventVector.emplace_back(std::piecewise_construct, std::tuple{*event},
                                       std::tuple{std::move(map), racePair, actorPair, weapPair, weapType, effectPair, keywordPair,
                                                  *targetPlayer, *dupeTimer, *healthCost, *staminaCost, *magickaCost, *effectiveCost});
+			if (spellsHaveUUID) {
+				if (!_additions.contains(spellUUID)) {
+					_additions[spellUUID] = std::vector<Loki::AnimationCasting::Cast*>();
+				}
+				_additions[spellUUID].push_back(&_eventVector.back().second);
+			}
 			//Loki::AnimationCasting::Cast* caster = &_eventVector.back().second;
-			//_casters[std::pair<std::string, size_t>(strPath, idx)] = caster;
-			//idx += 1;
         }
         logger::info("Successfully read {}...", path.string());
 
@@ -172,17 +180,12 @@ void Loki::DynamicAnimationCasting::LoadTomls() {
     logger::info("Successfully read all .tomls in file.");
 }
 
-//void Loki::DynamicAnimationCasting::LoadAdditions() {
-//	for (auto& elem : _additions) {
-//		_casters[elem.first]->additions = elem.second;
-//	}
-//}
-//
-//void Loki::DynamicAnimationCasting::ReplaceSpells(const std::string& a_filePath, std::uint32_t a_eventIdx, std::vector<RE::SpellItem*>* a_newSpells) {
-//	auto pairKey = std::pair<std::string, size_t>(a_filePath, a_eventIdx);
-//	_casters[pairKey]->additions = a_newSpells;
-//	_additions[pairKey] = a_newSpells;
-//}
+void Loki::DynamicAnimationCasting::ReplaceSpells(const std::string& a_uuid, const std::vector<RE::SpellItem*>& a_newSpells) {
+	for (auto& caster : _additions[a_uuid]) {
+		caster->replacements = std::move(a_newSpells);
+		_additionsCache[a_uuid] = &(caster->replacements);
+	}
+}
 //
 //void Loki::DynamicAnimationCasting::SwapSpell(const std::string &a_filePath, std::uint32_t a_eventIdx, RE::SpellItem* a_originalSpell, RE::SpellItem* a_newSpell)
 //{

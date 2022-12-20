@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include "Framework.h"
+#include "Serialization.h"
 
 using namespace RE::BSScript;
 using namespace SKSE;
@@ -35,139 +36,38 @@ namespace {
 		/*spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%n] [%l] [%t] [%s:%#] %v");*/
     }
 
-	//void SaveAdditions(SKSE::SerializationInterface* a_intfc) {
-	//	if (!a_intfc->OpenRecord('ADD_', 1)) {
-	//		logger::error("Failed to open record for spell additions.");
-	//	} else {
-	//		auto&       additions = Loki::DynamicAnimationCasting::_additions;
-	//		std::size_t size = additions.size();
-	//		if (!a_intfc->WriteRecordData(size)) {
-	//			logger::error("Failed to write size for spell additions.");
-	//		} else {
-	//			for (const auto& elem : additions) {
-	//				if (!a_intfc->WriteRecordData(elem.first.first)) {
-	//					logger::error("Failed to write toml string for spell addition.");
-	//					break;
-	//				}
-	//				if (!a_intfc->WriteRecordData(elem.first.second)) {
-	//					logger::error("Failed to write event index for spell addition.");
-	//					break;
-	//				}
-	//				if (!a_intfc->WriteRecordData(elem.second->size())) {
-	//					logger::error("Failed to write size of spells.");
-	//					break;
-	//				}
-	//				for (const auto& spell : *(elem.second)) {
-	//					std::int32_t formId = spell->formID;
-	//					if (!a_intfc->WriteRecordData(formId)) {
-	//						logger::error("Failed to write form id for spell.");
-	//						return;
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
+    bool InitializeSerialization() {
+        log::trace("Initializing cosave serialization...");
+        auto* serialization = GetSerializationInterface();
+        serialization->SetUniqueID('DYAC');
+        serialization->SetSaveCallback(Loki::Serialization::SaveAdditions);
+        serialization->SetLoadCallback(Loki::Serialization::LoadAdditions);
+        log::trace("Cosave serialization initialized.");
+		return true;
+    }
 
-	//void LoadAdditions(SKSE::SerializationInterface* a_intfc) {
-	//	std::vector<float> _data;
-
-	//	std::uint32_t type;
-	//	std::uint32_t version;
-	//	std::uint32_t length;
-
-	//	while (a_intfc->GetNextRecordInfo(type, version, length)) {
-	//		switch (type) {
-	//		case 'ADD_':
-	//			{
-	//				std::size_t size;
-	//				if (!a_intfc->ReadRecordData(size)) {
-	//					logger::error("Failed to load size of spell additions.");
-	//				}
-	//				for (std::uint32_t i = 0; i < size; i++) {
-	//					std::string filePath;
-	//					std::size_t eventIdx;
-	//					std::size_t numSpells;
-	//					std::vector<RE::SpellItem*> spells;
-	//					if (!a_intfc->ReadRecordData(filePath)) {
-	//						logger::error("Failed to load file path.");
-	//					} else {
-	//						if (!a_intfc->ReadRecordData(eventIdx)) {
-	//							logger::error("Failed to load event index.");
-	//						} else {
-	//							if (!a_intfc->ReadRecordData(numSpells)) {
-	//								logger::error("Failed to load size of spells.");
-	//							} else {
-	//								auto pairKey = std::pair<std::string, std::size_t>(filePath, eventIdx);
-	//								for (std::uint32_t ix = 0; ix < numSpells; ix++) {
-	//									std::int32_t oldFormId = 0;
-	//									RE::FormID   newFormId;
-	//									if (!a_intfc->ReadRecordData(oldFormId)) {
-	//										logger::error("Failed to load spell form id.");
-	//									} else {
-	//										if (!a_intfc->ResolveFormID(oldFormId, newFormId)) {
-	//											logger::error("Failed to resolve form id.");
-	//										} else {
-	//											auto spell = static_cast<RE::SpellItem*>(RE::TESForm::LookupByID(newFormId));
-	//											spells.push_back(spell);
-	//										}
-	//									}
-	//								}
-	//								Loki::DynamicAnimationCasting::_additions[pairKey]->clear();
-	//								Loki::DynamicAnimationCasting::_additions[pairKey] = &spells;
-	//							}
-	//						}
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
-	//	Loki::DynamicAnimationCasting::LoadAdditions();
-	//}
-
-	void SaveSwaps(SKSE::SerializationInterface* a_intfc) {
-
+	bool ReplaceSpells(RE::StaticFunctionTag*, RE::BSFixedString a_uuid, std::vector<RE::SpellItem*> a_newSpells) {
+		Loki::DynamicAnimationCasting::ReplaceSpells(std::string(a_uuid.c_str()), a_newSpells);
+		return true;
 	}
-
-	void SaveSpellData(SKSE::SerializationInterface* a_intfc)
-	{
-		//SaveAdditions(a_intfc);
-	}
-
-    //void InitializeSerialization() {
-    //    log::trace("Initializing cosave serialization...");
-    //    auto* serde = GetSerializationInterface();
-    //    serde->SetUniqueID(_byteswap_ulong('SMPL'));
-    //    serde->SetSaveCallback(Sample::HitCounterManager::OnGameSaved);
-    //    serde->SetRevertCallback(Sample::HitCounterManager::OnRevert);
-    //    serde->SetLoadCallback(Sample::HitCounterManager::OnGameLoaded);
-    //    log::trace("Cosave serialization initialized.");
-    //}
-
-	//bool ReplaceSpells(RE::StaticFunctionTag*, RE::BSFixedString a_filePath, std::uint32_t a_eventIdx, std::vector<RE::SpellItem*> a_newSpells) {
-	//	Loki::DynamicAnimationCasting::ReplaceSpells(std::string(a_filePath.c_str()), a_eventIdx, &a_newSpells);
-	//}
 
 	//bool SwapSpell(RE::StaticFunctionTag*, RE::BSFixedString a_filePath, std::uint32_t a_eventIdx, RE::SpellItem* a_originalSpell, RE::SpellItem* a_newSpell) {
 	//	Loki::DynamicAnimationCasting::SwapSpell(std::string(a_filePath.c_str()), a_eventIdx, a_originalSpell, a_newSpell);
 	//}
 
- //   bool InitializePapyrus(RE::BSScript::IVirtualMachine* a_vm) {
- //       log::trace("Initializing Papyrus binding...");
-	//	a_vm->RegisterFunction("ReplaceSpells", "DynamicAnimationCasting", ReplaceSpells);
-	//	a_vm->RegisterFunction("SwapSpell", "DynamicAnimationCasting", SwapSpell);
-	//	log::trace("Papyrus binding finished.");
-	//	return true;
- //   }
+    bool InitializePapyrus(RE::BSScript::IVirtualMachine* a_vm) {
+        log::trace("Initializing Papyrus binding...");
+		a_vm->RegisterFunction("ReplaceSpells", "DynamicAnimationCasting", ReplaceSpells);
+		log::trace("Papyrus binding finished.");
+		return true;
+    }
 
     void InitializeHooking() {
         //log::trace("Initializing trampoline...");
         //auto& trampoline = GetTrampoline();
         //trampoline.create(64);
         //log::trace("Trampoline initialized.");
-
         Loki::DynamicAnimationCasting::LoadTomls();
-
         Loki::DynamicAnimationCasting::InstallGraphEventSink();
     }
 
@@ -234,9 +134,9 @@ extern "C" [[maybe_unused]] DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::L
     SKSE::Init(skse);
 
     InitializeMessaging();
-    // InitializeSerialization();
-	//const auto papyrus = SKSE::GetPapyrusInterface();
-	//papyrus->Register(InitializePapyrus);
+	const auto papyrus = SKSE::GetPapyrusInterface();
+	papyrus->Register(InitializePapyrus);
+    InitializeSerialization();
 
     log::info("{} has finished loading.", plugin->GetName());
     return true;

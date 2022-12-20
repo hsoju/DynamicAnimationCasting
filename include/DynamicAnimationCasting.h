@@ -63,14 +63,13 @@ namespace Loki {
                 _properties.effectiveCost = a_eCost;
 			}
 
-			bool CastSpell(RE::SpellItem* a_spell, RE::Actor* a_actor, size_t numReassignments);
+			bool CastSpell(RE::SpellItem* a_spell, RE::Actor* a_actor);
 			void CastSpells(const RE::Actor* a_actor);
 			
 			std::string_view fileName;
 			std::uint32_t fileIdx;
 			long long previousTime = 0;
-			std::vector<RE::SpellItem*>* additions = nullptr;
-			std::vector<std::pair<RE::SpellItem*,RE::SpellItem*>>* reassignments = nullptr;
+			std::vector<RE::SpellItem*> replacements;
 
 		private:
 			Properties _properties;
